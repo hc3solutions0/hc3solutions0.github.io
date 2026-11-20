@@ -1,0 +1,111 @@
+---
+// Moldura de todas as páginas: cabeçalho, conteúdo e rodapé com o contato. Sem fontes, scripts
+// nem imagens de terceiros (SITE-05).
+import { EMPRESA } from '../empresa';
+
+interface Props {
+  titulo: string;
+  descricao: string;
+}
+
+const { titulo, descricao } = Astro.props;
+const ano = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={descricao} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{titulo}</title>
+  </head>
+  <body>
+    <header class="topo">
+      <a class="marca" href="/">
+        <img src="/favicon.svg" alt="" width="32" height="32" />
+        <span>{EMPRESA.nome}</span>
+      </a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="rodape">
+      <p>
+        © {ano}
+        {EMPRESA.nome} · Contato: <a href={`mailto:${EMPRESA.email}`}>{EMPRESA.email}</a>
+      </p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --fundo: #f7f8fb;
+    --superficie: #ffffff;
+    --texto: #1b1f2a;
+    --suave: #5a6275;
+    --borda: #dfe3ec;
+    --destaque: #1f5fd1;
+    --destaque-texto: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #10131a;
+      --superficie: #181c25;
+      --texto: #e8ebf2;
+      --suave: #a3abbd;
+      --borda: #2b3140;
+      --destaque: #7fa8ff;
+      --destaque-texto: #0d1220;
+    }
+  }
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  a {
+    color: var(--destaque);
+  }
+  main,
+  .topo,
+  .rodape {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  .topo {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--texto);
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
+  }
+  .rodape {
+    margin-top: 48px;
+    padding-top: 16px;
+    padding-bottom: 32px;
+    border-top: 1px solid var(--borda);
+    color: var(--suave);
+    font-size: 0.9rem;
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+// Página inicial: "Sobre" e um cartão por app (SITE-03, SITE-04).
+import { getCollection } from 'astro:content';
+
+import Base from '../layouts/Base.astro';
+import { EMPRESA } from '../empresa';
+
+const apps = (await getCollection('apps')).sort(
+  (a, b) => a.data.ordem - b.data.ordem || a.data.nome.localeCompare(b.data.nome, 'pt-BR'),
+);
+---
+
+<Base
+  titulo={EMPRESA.nome}
+  descricao="Aplicativos simples e práticos que resolvem pequenos problemas do dia a dia."
+>
+  <section class="sobre" aria-labelledby="sobre">
+    <h1 id="sobre">Sobre</h1>
+    <p>
+      Desenvolvemos aplicativos focados em resolver pequenos problemas do dia a dia de forma simples
+      e direta. Cada app nasce de uma necessidade real, como organizar o trabalho, registrar
+      informações ou agilizar tarefas repetitivas, e é pensado para ser fácil de usar e leve.
+    </p>
+  </section>
+
+  <section aria-labelledby="apps">
+    <h2 id="apps">Nossos apps</h2>
+    <ul class="apps">
+      {
+        apps.map((app) => (
+          <li class="app" data-app={app.id}>
+            <img src={app.data.icone} alt="" width="56" height="56" />
+            <div>
+              <h3>{app.data.nome}</h3>
+              <p>{app.data.frase}</p>
+              <p class="links">
+                {app.data.loja ? (
+                  <a class="loja" href={app.data.loja}>
+                    Baixar na Google Play
+                  </a>
+                ) : (
+                  <span class="em-breve">Em breve</span>
+                )}
+                <a href={`/${app.id}/privacidade`}>Política de privacidade</a>
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .sobre {
+    padding: 24px 0 8px;
+  }
+  h1 {
+    font-size: 2rem;
+    margin: 0 0 8px;
+  }
+  .sobre p {
+    max-width: 640px;
+    color: var(--suave);
+    font-size: 1.1rem;
+  }
+  .apps {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 16px;
+  }
+  .app {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+  }
+  .app img {
+    flex: none;
+    border-radius: 12px;
+  }
+  .app h3 {
+    margin: 0;
+  }
+  .app p {
+    margin: 4px 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+  }
+  .loja {
+    background: var(--destaque);
+    color: var(--destaque-texto);
+    padding: 4px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .em-breve {
+    color: var(--suave);
+    border: 1px solid var(--borda);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+</style>

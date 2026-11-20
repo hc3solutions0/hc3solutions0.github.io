@@ -1,0 +1,48 @@
+---
+// Política de privacidade de cada app em /<slug>/privacidade, a partir do corpo do Markdown
+// (SITE-01, SITE-02).
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return apps.map((app) => ({ params: { slug: app.id }, props: { app } }));
+}
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+}
+
+const { app } = Astro.props;
+const { Content } = await render(app);
+const atualizado = app.data.atualizadoEm.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+---
+
+<Base
+  titulo={`Política de privacidade · ${app.data.nome}`}
+  descricao={`Política de privacidade do app ${app.data.nome}.`}
+>
+  <article class="politica">
+    <h1>Política de privacidade · {app.data.nome}</h1>
+    <p class="atualizado">Última atualização: {atualizado}</p>
+    <Content />
+  </article>
+</Base>
+
+<style>
+  .politica {
+    max-width: 720px;
+  }
+  h1 {
+    font-size: 1.75rem;
+    line-height: 1.25;
+  }
+  .atualizado {
+    color: var(--suave);
+  }
+  .politica :global(h2) {
+    font-size: 1.2rem;
+    margin-top: 32px;
+  }
+</style>
