@@ -31,12 +31,12 @@ A Play Store exige que cada app tenha uma política de privacidade numa URL púb
 | Repositório              | `hc3solutions0/hc3solutions0.github.io`, **público**, publicado em `https://hc3solutions0.github.io/`                                                | Usuário: repositório na conta dele, reaproveitado pelos outros projetos; Pages da conta gratuita só publica repositório público | y          |
 | Nome da empresa          | "HC3 Solutions"                                                                                                                                      | Usuário escolheu "HC3 Solutions"                                                                | y          |
 | Conteúdo da página       | Seção "Sobre" com o texto "aplicativos que resolvem pequenos problemas do dia a dia" e lista de apps                                                 | Usuário marcou "Sobre (texto da loja)" e "Lista de apps"                                        | y          |
-| Gerador                  | Astro, com deploy pelo GitHub Actions (`withastro/action@v6` + `actions/deploy-pages`)                                                              | Usuário escolheu "Gerador"; Astro roda em Node como o resto dos projetos; não há Ruby na máquina para o Jekyll | y          |
+| Gerador                  | Astro 6, com deploy pelo GitHub Actions (`npm ci` + `npm test` + `actions/upload-pages-artifact` + `actions/deploy-pages`; no lugar do `withastro/action`, para as verificações rodarem antes de publicar)                                                              | Usuário escolheu "Gerador"; Astro roda em Node como o resto dos projetos; não há Ruby na máquina para o Jekyll | y          |
 | Texto do "Sobre"         | A versão média do texto gerado em 2026-11-20, na primeira pessoa do plural ("Desenvolvemos..."), sem a frase "funcionar mesmo sem internet"           | O site fala pela empresa; a frase sobre internet vale só para o OS Oficina                     | y          |
 | Cartão de cada app       | Nome, frase curta, ícone, link "Política de privacidade" e, quando publicado, link "Baixar na Google Play"; app ainda não publicado mostra "Em breve"  | Mínimo para apresentar e cumprir a Play; o link da loja só existe depois da publicação          | y          |
 | Um app = um arquivo      | Cada app é um arquivo Markdown numa content collection do Astro (`src/content/apps/<slug>.md`), com nome, frase, ícone, link da loja e a política no corpo | Novo app sem mexer no layout                                                                    | y          |
 | Endereço da política     | `/<slug>/privacidade`; o slug do OS Oficina é `osoficina` (o fim do `applicationId` `br.com.hc3solutions.osoficina`)                                 | Mesmo padrão para todos os apps                                                                 | y          |
-| Conteúdo da política do OS Oficina | Os dados (clientes, veículos, OS, orçamentos, fotos) ficam só no aparelho; sem coleta, envio a servidores, anúncios ou compartilhamento; a imagem do orçamento vai para a galeria e o WhatsApp é aberto pelo usuário; permissões usadas (câmera, galeria só gravação); contato; data da última atualização | Reflete o app validado pelo QA (base local, sem sincronização); muda quando a sincronização entrar | y          |
+| Conteúdo da política do OS Oficina | Os dados (oficina, clientes, veículos, OS, orçamentos, fornecedores) ficam só no aparelho; registros excluídos ficam marcados como excluídos no aparelho; sem coleta, envio a servidores, anúncios ou compartilhamento; a imagem do orçamento vai para a galeria e o WhatsApp é aberto pelo usuário; permissão usada (galeria, para salvar a imagem do orçamento; o app não usa câmera nem fotos); contato; data da última atualização | Reflete o app validado pelo QA (base local, sem sincronização); muda quando a sincronização entrar | y          |
 | E-mail de contato        | `hc3solutions0@gmail.com`, no rodapé e na política                                                                                                  | Usuário: "Usar o da conta GitHub" e informou o endereço                                         | y          |
 | Idioma e visual          | Português; uma página leve, responsiva, tema claro e escuro, sem fontes ou scripts de terceiros                                                      | Público brasileiro; sem terceiros o site não coleta dados                                       | y          |
 
@@ -70,7 +70,7 @@ A Play Store exige que cada app tenha uma política de privacidade numa URL púb
 **Acceptance Criteria**:
 
 1. The página inicial SHALL mostrar o nome "HC3 Solutions", a seção "Sobre" e a lista de apps. (SITE-03)
-2. The lista SHALL mostrar um cartão por app com nome, frase, ícone e o link da política; com link da loja, "Baixar na Google Play"; sem ele, "Em breve". (SITE-04)
+2. The lista SHALL mostrar um cartão por app com nome, frase, ícone (arquivo existente em `public/`) e o link da política; com link da loja, "Baixar na Google Play"; sem ele, "Em breve". (SITE-04)
 3. The site SHALL funcionar a partir de 320 px de largura, sem rolagem horizontal, e não carregar scripts, fontes ou imagens de terceiros. (SITE-05)
 
 **Independent Test**: Abrir a página inicial no celular, ver o OS Oficina com "Em breve" e o link da política.
@@ -95,7 +95,7 @@ A Play Store exige que cada app tenha uma política de privacidade numa URL púb
 ## Edge Cases
 
 - WHEN alguém abre um endereço que não existe THEN o site SHALL mostrar uma página 404 com link para a página inicial. (SITE-08)
-- IF um arquivo de app não tiver nome, frase, ícone ou política THEN o build SHALL falhar nomeando o campo faltante (schema da content collection). (SITE-09)
+- IF um arquivo de app não tiver nome, frase, ícone (ou apontar para um ícone inexistente), data de atualização ou política no corpo THEN o build SHALL falhar nomeando o campo faltante. (SITE-09)
 
 ---
 

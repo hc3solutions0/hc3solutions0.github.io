@@ -7,6 +7,11 @@ import Base from '../../layouts/Base.astro';
 
 export async function getStaticPaths() {
   const apps = await getCollection('apps');
+  // O corpo do Markdown é a política: app sem política não pode ir ao ar (SITE-09).
+  const semPolitica = apps.filter((app) => (app.body ?? '').trim() === '').map((app) => app.id);
+  if (semPolitica.length > 0) {
+    throw new Error(`política de privacidade vazia no corpo de: ${semPolitica.join(', ')}`);
+  }
   return apps.map((app) => ({ params: { slug: app.id }, props: { app } }));
 }
 

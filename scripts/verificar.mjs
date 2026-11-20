@@ -66,12 +66,20 @@ function verificarSiteReal() {
     'SITE-01 política do OS Oficina em /osoficina/privacidade',
     [
       'Política de privacidade · OS Oficina',
+      'Quais informações o app guarda',
+      'Dados da oficina: nome e WhatsApp',
+      'Clientes: nome, WhatsApp e observações',
+      'Veículos: placa, marca, modelo, ano, cor, combustível, chassi e observações',
+      'Ordens de serviço e orçamentos: quilometragem de entrada',
+      'Fornecedores: nome e WhatsApp',
+      'marcado como excluído',
       'Última atualização: 20/11/2026',
       'os dados ficam só no seu celular',
       'não envia nada para servidores',
       'Não mostra anúncios',
       'Permissões',
-      'Fotos e mídia (somente gravação)',
+      'Fotos e mídia: usada apenas para salvar na galeria a imagem do orçamento',
+      'não lê e não envia as fotos da sua galeria',
       'hc3solutions0@gmail.com',
     ].every((trecho) => politica.includes(trecho)),
     'página ausente ou sem algum trecho obrigatório',
@@ -99,9 +107,12 @@ function verificarSiteReal() {
   );
 
   const cartao = inicioHtml.match(/<li[^>]*data-app="osoficina"[\s\S]*?<\/li>/)?.[0] ?? '';
+  const frase = readFileSync(join(RAIZ, 'src', 'content', 'apps', 'osoficina.md'), 'utf8').match(/^frase: (.+)$/m)?.[1] ?? '';
   checar(
     'SITE-04 cartão sem link da loja mostra Em breve e a política',
     cartao.includes('OS Oficina') &&
+      frase !== '' &&
+      texto(cartao).includes(frase) &&
       texto(cartao).includes('Em breve') &&
       !cartao.includes('Baixar na Google Play') &&
       cartao.includes('href="/osoficina/privacidade"') &&
@@ -109,19 +120,29 @@ function verificarSiteReal() {
     'cartão do OS Oficina incompleto',
   );
 
+  // Recursos carregados de outro endereço: em HTML (fora de <a>), CSS e SVG gerados.
   const externos = [];
-  for (const arquivo of arquivosHtml(dist)) {
-    const html = readFileSync(join(dist, arquivo), 'utf8');
+  const EXTERNO = /^(https?:)?\/\//;
+  const arquivos = readdirSync(dist, { recursive: true })
+    .map(String)
+    .filter((nome) => /\.(html|css|svg|js)$/.test(nome));
+  for (const arquivo of arquivos) {
+    const conteudo = readFileSync(join(dist, arquivo), 'utf8');
+    const semLinks = conteudo.replace(/<a\s[^>]*>/g, '<a>');
     const recursos = [
-      ...html.matchAll(/<(?:script|img|iframe|source|video|audio)[^>]*\ssrc="([^"]+)"/g),
-      ...html.matchAll(/<link[^>]*\shref="([^"]+)"/g),
-      ...html.matchAll(/url\(\s*['"]?([^'")]+)/g),
-      ...html.matchAll(/@import\s+['"]([^'"]+)/g),
-    ].map((achado) => achado[1]);
+      ...semLinks.matchAll(/\s(?:src|href|data|poster|action|xlink:href)\s*=\s*["']?([^"'\s>]+)/g),
+      ...semLinks.matchAll(/\ssrcset\s*=\s*["']?([^"'>]+)/g),
+      ...semLinks.matchAll(/url\(\s*['"]?([^'")]+)/g),
+      ...semLinks.matchAll(/@import\s*(?:url\()?\s*['"]?([^'");\s]+)/g),
+    ].flatMap((achado) => achado[1].split(',').map((parte) => parte.trim().split(/\s+/)[0]));
     for (const recurso of recursos) {
-      if (/^(https?:)?\/\//.test(recurso)) externos.push(`${arquivo}: ${recurso}`);
+      if (EXTERNO.test(recurso) && !recurso.startsWith('http://www.w3.org/')) externos.push(`${arquivo}: ${recurso}`);
     }
-    if (!html.includes('<meta name="viewport" content="width=device-width, initial-scale=1"')) {
+    // Larguras fixas acima de 320 px (fora das condições de @media) causam rolagem lateral no celular.
+    for (const [, propriedade, valor] of conteudo.matchAll(/[{;]\s*(min-width|width)\s*:\s*(\d+)px/g)) {
+      if (Number(valor) > 320) externos.push(`${arquivo}: ${propriedade} ${valor}px`);
+    }
+    if (arquivo.endsWith('.html') && !conteudo.includes('<meta name="viewport" content="width=device-width, initial-scale=1"')) {
       externos.push(`${arquivo}: sem meta viewport`);
     }
   }
@@ -139,14 +160,17 @@ function verificarSiteReal() {
   );
   checar(
     'SITE-07 deploy só roda depois do build',
-    /deploy:\s*\n\s*needs: build/.test(workflow) && workflow.indexOf('npm test') < workflow.indexOf('upload-pages-artifact'),
+    /deploy:\s*\n\s*needs: build/.test(workflow) &&
+      !/^\s*if:/m.test(workflow.slice(workflow.indexOf('\n  deploy:'))) &&
+      workflow.indexOf('npm test') < workflow.indexOf('upload-pages-artifact'),
     'deploy não depende do build',
   );
 
   const pagina404 = ler(dist, '404.html');
   checar(
     'SITE-08 página 404 com link para o início',
-    texto(pagina404).includes('Página não encontrada') && pagina404.includes('href="/"'),
+    texto(pagina404).includes('Página não encontrada') &&
+      /<a href="\/">Voltar para a página inicial<\/a>/.test(pagina404),
     '404.html ausente ou sem link para /',
   );
 }
@@ -193,6 +217,12 @@ function verificarAppsDeExemplo() {
     if (resultado.ok || !resultado.saida.includes(campo)) faltando.push(campo);
     rmSync(resultado.pasta, { recursive: true, force: true });
   }
+  const semPolitica = gerarComApps({ vazio: APP_PUBLICADO.replace('Texto da política do app publicado.', '') });
+  if (semPolitica.ok || !semPolitica.saida.includes('política de privacidade vazia')) faltando.push('política');
+  rmSync(semPolitica.pasta, { recursive: true, force: true });
+  const iconeInexistente = gerarComApps({ semicone: APP_PUBLICADO.replace('/apps/osoficina.svg', '/apps/nao-existe.svg') });
+  if (iconeInexistente.ok || !iconeInexistente.saida.includes('icone')) faltando.push('icone inexistente');
+  rmSync(iconeInexistente.pasta, { recursive: true, force: true });
   checar(
     'SITE-09 app sem campo obrigatório faz o build falhar nomeando o campo',
     faltando.length === 0,

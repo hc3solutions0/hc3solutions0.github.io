@@ -14,8 +14,8 @@ Para funcionar, o app guarda as informações que você mesmo digita:
 
 - **Dados da oficina:** nome e WhatsApp, usados no cabeçalho dos orçamentos.
 - **Clientes:** nome, WhatsApp e observações.
-- **Veículos:** placa, marca, modelo, ano, cor, combustível, chassi e quilometragem.
-- **Ordens de serviço e orçamentos:** problema relatado, diagnóstico, serviços, peças, quantidades, valores, custos, descontos, datas, status e observações.
+- **Veículos:** placa, marca, modelo, ano, cor, combustível, chassi e observações.
+- **Ordens de serviço e orçamentos:** quilometragem de entrada, problema relatado, diagnóstico, serviços, peças, quantidades, valores, custos, descontos, datas, status e observações.
 - **Fornecedores:** nome e WhatsApp.
 
 ## Onde as informações ficam
@@ -43,11 +43,13 @@ O envio é feito por você, no WhatsApp. A partir daí, a mensagem e a imagem se
 
 ## Permissões
 
-- **Fotos e mídia (somente gravação):** usada apenas para salvar na galeria a imagem do orçamento que você vai enviar. O app não lê suas fotos. Se você negar a permissão, o restante do app continua funcionando, mas o envio do orçamento pelo WhatsApp não acontece.
+- **Fotos e mídia:** usada apenas para salvar na galeria a imagem do orçamento que você vai enviar. O app não abre, não lê e não envia as fotos da sua galeria. Se você negar a permissão, o restante do app continua funcionando, mas o envio do orçamento pelo WhatsApp não acontece.
 
 ## Por quanto tempo os dados ficam
 
-Os dados ficam no aparelho até você excluí-los no app. Ao desinstalar o app ou limpar os dados dele nas configurações do Android, todas as informações são apagadas do aparelho. As imagens de orçamento salvas na galeria continuam lá até você apagá-las.
+Quando você exclui um cliente, veículo, ordem de serviço, orçamento ou fornecedor, ele deixa de aparecer no app, mas o registro continua guardado no banco de dados do aparelho, marcado como excluído, para preservar o histórico. Nada disso sai do aparelho.
+
+Para apagar todas as informações de vez, desinstale o app ou limpe os dados dele nas configurações do Android. As imagens de orçamento salvas na galeria continuam lá até você apagá-las.
 
 ## Crianças
 
